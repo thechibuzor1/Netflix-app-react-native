@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "netflix-clone",
+    "slug": "netflix-clone",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "netflix-clone"
+}
