@@ -289,6 +289,9 @@ const Discover = ({ navigation }) => {
                 ))}
               </View>
             )}
+            <Text style={styles.footer}>
+              The_chibuzor. Copyright &copy; 2022
+            </Text>
           </ScrollView>
         </>
       )}
@@ -302,6 +305,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "black",
     flex: 1,
+  },
+  footer: {
+    alignSelf: "center",
+    color: "gray",
+    marginTop: 15,
+    marginBottom: 15,
   },
   header: {
     marginTop: 30,

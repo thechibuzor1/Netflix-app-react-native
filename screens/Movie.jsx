@@ -16,6 +16,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import ColumnPosts from "../components/ColumnPost";
 import Axios from "axios";
 import { useSelector } from "react-redux";
+import Notification from "../components/Notification";
 
 export default function Movie({ route, navigation }) {
   const { userData } = useSelector((state) => state.userReducer);
@@ -26,31 +27,66 @@ export default function Movie({ route, navigation }) {
   const [activeTab, setActive] = useState("similar");
   const [urlId, setUrlId] = useState("");
   const similarUrl = `${movie.id}//similar?api_key=${API_KEY}&language=en-US&page=1`;
+  const [inList, setInlist] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
 
-  const handleMovies = (id) => {
-    axios
-      .get(`/movie/${id}/videos?api_key=${API_KEY}&language=en-US`)
+  useEffect(() => {
+    setTimeout(() => {
+      setShowNotif(false);
+    }, 3000);
+  }, [showNotif]);
+
+  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
+  const fetchCheck = async () => {
+    try {
+      const result = await Axios.post(
+        `${URL}/checklist`,
+        {
+          title: movie.title || movie.name,
+        },
+        {
+          headers: { Authorization: `Bearer ${userData.token}` },
+        }
+      );
+      setInlist(result.data.InLIst);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  useEffect(() => {
+    fetchCheck();
+  }, [movie]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.resolve(
+      axios.get(`/movie/${movie.id}/videos?api_key=${API_KEY}&language=en-US`)
+    )
       .then((response) => {
-        if (response.data.results.length !== 0) {
-          setUrlId(response.data.results[0]);
+        if (isMounted) {
+          setUrlId(response.data.results[0].key);
         }
       })
       .catch(() => {
-        axios
-          .get(`/tv/${id}/videos?api_key=${API_KEY}&language=en-US`)
-          .then((response) => {
-            if (response.data.results.length !== 0) {
-              setUrlId(response.data.results[0]);
-            }
-          });
+        Promise.resolve(
+          axios.get(`/tv/${movie.id}/videos?api_key=${API_KEY}&language=en-US`)
+        ).then((response) => {
+          if (isMounted) {
+            setUrlId(response.data.results[0].key);
+          }
+        });
       });
-    console.log(urlId);
-  };
 
-  const addToList = async (movie) => {
+    //clean up
+    return () => {
+      isMounted = false;
+    };
+  }, [movie.id]);
+
+  const addToList = (movie) => {
     try {
-      await Axios.post(
-        `http://192.168.99.122:5000/api/users/list`,
+      Axios.post(
+        `${URL}/list`,
         {
           movie: movie,
           title: movie.title || movie.name,
@@ -59,31 +95,24 @@ export default function Movie({ route, navigation }) {
           headers: { Authorization: `Bearer ${userData.token}` },
         }
       );
-      console.log("Added to list");
     } catch (err) {
       console.log(err);
     }
   };
 
-  const removeFromList = async (movie) => {
+  const removeFromList = (movie) => {
     try {
-      await Axios.delete(
-        `http://192.168.99.122:5000/api/users/list/${
-          movie.title || movie.name
-        }`,
-        {
-          headers: { Authorization: `Bearer ${userData.token}` },
-        }
-      );
-      console.log("removed from list");
+      Axios.delete(`${URL}/list/${movie.title || movie.name}`, {
+        headers: { Authorization: `Bearer ${userData.token}` },
+      });
     } catch (err) {
       console.log(err);
     }
   };
-  const addToHistory = async (movie) => {
+  const addToHistory = (movie) => {
     try {
-      await Axios.post(
-        `http://192.168.99.122:5000/api/users/history`,
+      Axios.post(
+        `${URL}/history`,
         {
           movie: movie,
           title: movie.title || movie.name,
@@ -125,7 +154,6 @@ export default function Movie({ route, navigation }) {
     video: {
       width: "100%",
       height: 400,
-      marginBottom: 20,
     },
     button: {
       backgroundColor: "white",
@@ -182,34 +210,29 @@ export default function Movie({ route, navigation }) {
       marginTop: 5,
       fontWeight: "bold",
     },
-    List: {
-      flexDirection: "row",
-      justifyContent: "center",
-    },
+    List: {},
     add: {
-      backgroundColor: "white",
-      marginLeft: 10,
+      backgroundColor: "transparent",
+      marginLeft: 30,
       marginRight: 30,
       height: 70,
       marginTop: 20,
-      borderRadius: 5,
-      alignItems: "center",
-      justifyContent: "center",
+      width: "15%",
+      borderRadius: 50,
     },
     remove: {
-      backgroundColor: "red",
-      marginLeft: 50,
-      marginRight: 10,
+      backgroundColor: "transparent",
+      marginLeft: 30,
+      marginRight: 30,
       height: 70,
       marginTop: 20,
-      borderRadius: 5,
-      alignItems: "center",
-      justifyContent: "center",
+      width: "15%",
+      borderRadius: 50,
     },
     addText: {
-      marginLeft: 10,
-      marginRight: 10,
-      fontSize: 15,
+      color: "white",
+      alignSelf: "center",
+      fontSize: 10,
     },
     moreBtn: {
       flexDirection: "row",
@@ -244,12 +267,19 @@ export default function Movie({ route, navigation }) {
   });
   return (
     <View style={styles.container}>
+      {showNotif && (
+        <Notification
+          text={inList ? "Added to My  List" : "Removed from My List"}
+        />
+      )}
+
       <View
         style={{
           flexDirection: "row",
           display: "flex",
           justifyContent: "space-between",
           marginTop: 40,
+          marginBottom: 20,
         }}
       >
         <TouchableOpacity
@@ -275,20 +305,21 @@ export default function Movie({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-      <Video
-        ref={video}
-        style={styles.video}
-        posterSource={{
-          uri: img_url,
-        }}
-        usePoster={true}
-        posterStyle={styles.poster}
-        source={require("../assests/Rick.mp4")}
-        resizeMode="contain"
-        isLooping
-        onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-      />
       <ScrollView showsVerticalScrollIndicator={false}>
+        <Video
+          ref={video}
+          style={styles.video}
+          posterSource={{
+            uri: img_url,
+          }}
+          usePoster={true}
+          posterStyle={styles.poster}
+          source={require("../assests/Rick.mp4")}
+          resizeMode="contain"
+          isLooping
+          onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+        />
+
         <View>
           <TouchableOpacity
             style={styles.button}
@@ -334,15 +365,47 @@ export default function Movie({ route, navigation }) {
           </Text>
         </View>
         <View style={styles.List}>
-          <TouchableOpacity style={styles.add} onPress={() => addToList(movie)}>
-            <Text style={styles.addText}>Add to my list</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.remove}
-            onPress={() => removeFromList(movie)}
-          >
-            <Text style={styles.addText}>Remove from my list</Text>
-          </TouchableOpacity>
+          {inList ? (
+            <TouchableOpacity
+              style={styles.remove}
+              onPress={() => {
+                setShowNotif(true);
+                setInlist(!inList);
+                removeFromList(movie);
+              }}
+            >
+              <Icon
+                style={{
+                  fontSize: 30,
+                  fontWeight: "300",
+                  alignSelf: "center",
+                  color: "white",
+                }}
+                name="check"
+              />
+              <Text style={styles.addText}>My List</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.add}
+              onPress={() => {
+                setShowNotif(true);
+                setInlist(!inList);
+                addToList(movie);
+              }}
+            >
+              <Icon
+                style={{
+                  fontSize: 30,
+                  fontWeight: "300",
+                  alignSelf: "center",
+                  color: "white",
+                }}
+                name="plus"
+              />
+              <Text style={styles.addText}>My List</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.moreBtn}>
@@ -356,7 +419,6 @@ export default function Movie({ route, navigation }) {
             style={styles.trailerBtn}
             onPress={() => {
               setActive("trailer");
-              handleMovies(movie.id);
             }}
           >
             <Text style={styles.similarTxt}>Trailer & more</Text>
@@ -371,7 +433,11 @@ export default function Movie({ route, navigation }) {
         )}
         {activeTab === "trailer" && (
           <View style={styles.trailer}>
-            <YoutubePlayer height={300} play={true} videoId={urlId} />
+            <YoutubePlayer
+              height={300}
+              play={true}
+              videoId={urlId.toString()}
+            />
           </View>
         )}
       </ScrollView>

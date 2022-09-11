@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  BackHandler,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import LottieView from "lottie-react-native";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native-paper";
 
@@ -18,20 +25,56 @@ export default function AuthScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
 
+  const validateEmail = (email) => {
+    var re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  };
+
   const switchMode = () => {
     setIsSignup((prevIsSignup) => !prevIsSignup);
   };
 
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation.isFocused()) {
+        Alert.alert("Hold on!", "Are you sure you want to leave???", [
+          {
+            text: "Cancel",
+            onPress: () => null,
+            style: "cancel",
+          },
+          { text: "YES", onPress: () => BackHandler.exitApp() },
+        ]);
+        return true;
+      }
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
   const submitHandler = async () => {
     if (isSignup) {
+      if (!validateEmail(email)) {
+        alert("Invalid Email Format!");
+        return;
+      }
+      if (password.length < 6) {
+        alert("Password must be a minimum 6 characters");
+        return;
+      }
       if (password !== confirmPassword) {
         alert("Passwords don't match.");
         return;
       }
+
       setLoading(true);
       try {
         return fetch(
-          "https://netflixappbackend.herokuapp.com/api/users/signup",
+          "https://netflix-app-backend.herokuapp.com/api/users/signup",
           {
             method: "POST",
             headers: {
@@ -67,9 +110,10 @@ export default function AuthScreen({ navigation }) {
         console.log(error);
       }
     } else {
+      setLoading(true);
       try {
         return fetch(
-          "https://netflixappbackend.herokuapp.com/api/users/signin",
+          "https://netflix-app-backend.herokuapp.com/api/users/signin",
           {
             method: "POST",
             headers: {
@@ -97,6 +141,7 @@ export default function AuthScreen({ navigation }) {
             });
           } else {
             alert("Invalid Credentials");
+            setLoading(false);
           }
         });
       } catch (error) {
@@ -104,15 +149,8 @@ export default function AuthScreen({ navigation }) {
         console.log(error);
       }
     }
+    setLoading(false);
   };
-
-  /* useEffect(() => {
-    if (userData) {
-      navigation.navigate("Watching", {
-        data: userData,
-      });
-    }
-  }, []); */
 
   return (
     <View style={styles.container}>

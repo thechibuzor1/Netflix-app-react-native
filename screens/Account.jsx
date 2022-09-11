@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import axios from "axios";
 import { TextInput } from "react-native-paper";
+import ToastManager, { Toast } from "toastify-react-native";
 
 const Account = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -25,21 +26,37 @@ const Account = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
+  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
   const signOut = async () => {
     await AsyncStorage.removeItem("userData");
     navigation.navigate("Auth");
   };
   const [modal, setModal] = useState(false);
 
+  const validateEmail = (email) => {
+    var re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  };
+
   const submitHandler = async () => {
+    if (!validateEmail(email)) {
+      alert("Invalid Email Format!");
+      return;
+    }
+    if (password.length < 6) {
+      alert("Password must be a minimum 6 characters");
+      return;
+    }
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
+
     setLoading(true);
     try {
       const { data } = await axios.put(
-        "http://192.168.99.122:5000/api/users/profile",
+        `${URL}/profile`,
         {
           name,
           email,
@@ -57,14 +74,24 @@ const Account = ({ navigation }) => {
       setLoading(false);
       console.log(data);
       setModal(false);
+      Toast.success("Profile update sucessfull");
     } catch (err) {
-      console.log(err);
+      Toast.error(err);
+      setLoading(false);
     }
+    setLoading(false);
   };
   const accountModal = () => {
     return (
       <>
         <View style={styles.modalContainer}>
+          <ToastManager
+            position="bottom"
+            positionValue={0}
+            style={{
+              backgroundColor: "black",
+            }}
+          />
           <View style={styles.accountContainer}>
             <View
               style={{

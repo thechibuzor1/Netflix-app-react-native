@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   poster: {
     height: 200,
     width: 130,
-    borderRadius: 7,
+    borderRadius: 3,
     marginLeft: 20,
     alignSelf: "center",
   },

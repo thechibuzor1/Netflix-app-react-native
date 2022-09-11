@@ -37,7 +37,7 @@ const Banner = ({ navigation, ...prop }) => {
     <View style={styles.banner}>
       <ImageBackground
         source={{
-          uri: `${movie ? imageUrl + movie.poster_path : ""}`,
+          uri: `${movie ? imageUrl + movie.poster_path : null}`,
         }}
         style={styles.image}
         ref={imgRef}
@@ -63,13 +63,22 @@ const Banner = ({ navigation, ...prop }) => {
         <View style={styles.content}>
           <View style={styles.banner_buttons}>
             <TouchableOpacity
+              style={styles.button}
               onPress={() =>
                 navigation.navigate("Movie", {
                   movie: movie,
                 })
               }
             >
-              <Text style={styles.button}>Play</Text>
+              <Icon
+                style={{
+                  marginRight: 5,
+                  marginLeft: 20,
+                  marginTop: 2,
+                }}
+                name="play"
+              />
+              <Text style={styles.buttonTitle}>Play</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.description}>
@@ -98,6 +107,17 @@ const styles = StyleSheet.create({
     marginRight: 20,
     height: "88%",
   },
+  button: {
+    backgroundColor: "white",
+    marginLeft: 30,
+    marginRight: 30,
+    height: 48,
+    marginTop: 20,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
   search: {
     color: "white",
     fontSize: 25,
@@ -112,6 +132,11 @@ const styles = StyleSheet.create({
   logo: {
     height: 40,
     width: 25,
+  },
+  play: {
+    color: "black",
+    marginRight: 5,
+    marginTop: 5,
   },
   image: {
     height: "100%",
@@ -135,16 +160,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  button: {
-    backgroundColor: "red",
-    padding: 10,
-    width: 100,
+  buttonTitle: {
+    color: "black",
+    fontSize: 16,
+    fontWeight: "bold",
     textAlign: "center",
     alignSelf: "center",
     borderRadius: 5,
-    marginRight: 10,
-    color: "white",
+    marginRight: 20,
   },
+
   list_button: {
     backgroundColor: "white",
     padding: 10,

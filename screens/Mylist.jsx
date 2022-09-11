@@ -8,11 +8,12 @@ import MyListCol from "../components/MyListCol";
 const Mylist = ({ navigation }) => {
   const { userData } = useSelector((state) => state.userReducer);
   const [myList, setMyList] = useState([]);
+  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
   useEffect(() => {
     const fetchList = async () => {
       const myList = [];
       try {
-        return fetch(`http://192.168.99.122:5000/api/users/list`, {
+        return fetch(`${URL}/list`, {
           headers: {
             authorization: `Bearer ${userData.token}`,
           },

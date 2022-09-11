@@ -1,4 +1,11 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  BackHandler,
+  Alert,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import Banner from "../components/Banner";
 import axios from "../Axios";
@@ -23,24 +30,20 @@ import MyListRow from "../components/MyListRow";
 
 const Home = ({ navigation }) => {
   const { userData } = useSelector((state) => state.userReducer);
-  const [banner, setBanner] = useState();
-
   const [myList, setMyList] = useState([]);
 
   const [myHistory, setMyHistory] = useState([]);
+  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
 
   useEffect(() => {
     const fetchList = async () => {
       const myList = [];
       try {
-        const result = await Axios.get(
-          `https://netflixappbackend.herokuapp.com/api/users/list`,
-          {
-            headers: {
-              authorization: `Bearer ${userData.token}`,
-            },
-          }
-        );
+        const result = await Axios.get(`${URL}/list`, {
+          headers: {
+            authorization: `Bearer ${userData.token}`,
+          },
+        });
 
         for (const element of result.data.list) {
           myList.push(element.movie[0]);
@@ -53,14 +56,11 @@ const Home = ({ navigation }) => {
     const fetchHistory = async () => {
       const myHistory = [];
       try {
-        const result = await Axios.get(
-          `https://netflixappbackend.herokuapp.com/api/users/history`,
-          {
-            headers: {
-              authorization: `Bearer ${userData.token}`,
-            },
-          }
-        );
+        const result = await Axios.get(`${URL}/history`, {
+          headers: {
+            authorization: `Bearer ${userData.token}`,
+          },
+        });
         for (const element of result.data.history) {
           myHistory.push(element.movie[0]);
         }
@@ -72,6 +72,28 @@ const Home = ({ navigation }) => {
     fetchList();
     fetchHistory();
   }, [userData.token]);
+
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation.isFocused()) {
+        Alert.alert("Hold on!", "Are you sure you want to leave???", [
+          {
+            text: "Cancel",
+            onPress: () => null,
+            style: "cancel",
+          },
+          { text: "YES", onPress: () => BackHandler.exitApp() },
+        ]);
+        return true;
+      }
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -113,6 +135,7 @@ const Home = ({ navigation }) => {
         url={documentaries}
         title="Documentaries"
       />
+      <Text style={styles.footer}>The_chibuzor. Copyright &copy; 2022</Text>
     </ScrollView>
   );
 };
@@ -122,5 +145,11 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "black",
+  },
+  footer: {
+    alignSelf: "center",
+    color: "gray",
+    marginTop: 15,
+    marginBottom: 15,
   },
 });
