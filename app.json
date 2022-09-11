@@ -1,11 +1,30 @@
 {
+  "displayName": "Netflix",
   "expo": {
-    "name": "netflix-clone",
-    "slug": "netflix-clone",
+    "name": "Netflix clone",
+    "slug": "Netflix-clone",
+    "orientation": "portrait",
+    "icon": "./assests/avatar.png",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "downbadbuzor.netflix"
+    },
+    "android": {
+      "package": "downbadbuzor.netflix",
+      "adaptiveIcon": {
+        "foregroundImage": "./assests/avatar.png",
+        "backgroundColor": "#000000"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "565b8581-e16d-4c75-a444-884cdea209b9"
+      } 
+    }
   },
-  "name": "netflix-clone"
+  "name": "Netflix clone"
 }
