@@ -26,7 +26,7 @@ const Account = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
-  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
+  const URL = "https://netflix-clone-backend-uoju.onrender.com/api/users";
   const signOut = async () => {
     await AsyncStorage.removeItem("userData");
     navigation.navigate("Auth");

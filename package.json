@@ -1,6 +1,6 @@
 {
   "name": "netflix-clone",
-  "proxy": "http://localhost:5000",
+  "proxy": "https://netflix-clone-backend-uoju.onrender.com:10000",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {

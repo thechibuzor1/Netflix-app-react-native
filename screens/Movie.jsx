@@ -36,7 +36,7 @@ export default function Movie({ route, navigation }) {
     }, 3000);
   }, [showNotif]);
 
-  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
+  const URL = "https://netflix-clone-backend-uoju.onrender.com/api/users";
   const fetchCheck = async () => {
     try {
       const result = await Axios.post(

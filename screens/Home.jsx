@@ -33,7 +33,7 @@ const Home = ({ navigation }) => {
   const [myList, setMyList] = useState([]);
 
   const [myHistory, setMyHistory] = useState([]);
-  const URL = "https://netflix-app-backend.herokuapp.com/api/users";
+  const URL = "https://netflix-clone-backend-uoju.onrender.com/api/users";
 
   useEffect(() => {
     const fetchList = async () => {

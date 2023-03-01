@@ -74,8 +74,9 @@ export default function AuthScreen({ navigation }) {
       setLoading(true);
       try {
         return fetch(
-          "https://netflix-app-backend.herokuapp.com/api/users/signup",
+          "https://netflix-clone-backend-uoju.onrender.com/api/users/signup",
           {
+            
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -113,7 +114,7 @@ export default function AuthScreen({ navigation }) {
       setLoading(true);
       try {
         return fetch(
-          "https://netflix-app-backend.herokuapp.com/api/users/signin",
+          "https://netflix-clone-backend-uoju.onrender.com/api/users/signin",
           {
             method: "POST",
             headers: {

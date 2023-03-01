@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
   poster: {
     height: 200,
     width: 130,
-    borderRadius: 3,
-    marginLeft: 20,
+    borderRadius: 5,
+    marginLeft: 7,
     alignSelf: "center",
   },
 });
